@@ -6,10 +6,10 @@ Task1
 O(2n+2): There are two lines executing only once (before for loop), yielding +2. There are one line executing twice (sliced tuple) inside the O(n) for loop, yielding 2n.
 
 Task2
-O(4n+1): There is one line executing only once (before loop), yielding +1. Worst-case (non-unique number), there are two lines executing twice (sliced tuple) inside the O(n) for loop, yielding 4n.
+O(n*m+8n+2): There are two one line executions. 6n to filter calls and n*m to sum all time values for each unique number. 2n to determine and print maximum values. I was unable to solve the problem with maps, however I did reduce the complexity from n^2 to n*m by using dictionaries (m <= n/2).
 
 Task3
-O(n log n + 2n + 10): PART A has 8 one line executions. n log n is added due to sorted(), 1n for list.index() to determine fixed area codes, and 1n for printing the results. PART B has 2 one line executions. 
+O(n log n + 2n + 11): PART A has 8 one line executions. n log n is added due to sorted(), 1n for list.index() to determine fixed area codes, and 1n + 1 for printing the results. PART B has 2 one line executions.
 
 Task4
-O(n log n + 2n + 6): There are 6 one line executions. n log n is added due to the sorted(), 1n for for loop to build telemarketer list, and 1n for printing the results.
+O(n log n + 2n + 6): There are 6 one line executions. 4n to build telemarketer list (changed to sets), and n log n + n for printing the results using sorted() and for loop.

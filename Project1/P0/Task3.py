@@ -59,7 +59,8 @@ bangalore_recipient_telemarketer_code = list(set([number for number in bangalore
 bangalore_recipient_fixed_code = list(set([number[1:number.index(')')] for number in bangalore_recipients_unique if number[0] == '('])); #O(n); slice fixed
 
 print("The numbers called by people in Bangalore have codes:") #O(1)
-for item in sorted(bangalore_recipient_fixed_code+bangalore_recipient_mobile_code+bangalore_recipient_telemarketer_code): #O(n log n) + O(n)
+bangalore_codes = sorted(bangalore_recipient_fixed_code+bangalore_recipient_mobile_code+bangalore_recipient_telemarketer_code) #O(1)
+for item in bangalore_codes: #O(n log n) + O(n)
     print(item)
 #PART B
 bangalore_local_calls = [number for number in bangalore_recipients if number[:5] == '(080)'] #O(1); slice bangalore_recipients for local numbers only

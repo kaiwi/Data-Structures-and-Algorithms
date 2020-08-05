@@ -23,17 +23,24 @@ September 2016.".
 #get unique numbers
 #check calls[0] against unique and add calls[3] to unique[n].
 
-duration_log = [] # list of tuples of [number, duration]
+#dissect each tuple into phone number and duration
+#append list
+
+#duration_log = list(map(lambda x: (x[0],float(x[3])),calls)) + list(map(lambda x: (x[1],float(x[3])),calls)) #O(2n)
+
+duration_log = {} #O(1)
+for caller, recipient, datetime, duration in calls: #O(6n)
+    duration_sum = duration_log.get(caller,[])
+    duration_sum.append(float(duration))
+    duration_log[caller] = duration_sum
+    duration_sum = duration_log.get(recipient, [])
+    duration_sum.append(float(duration))
+    duration_log[recipient] = duration_sum
+
+temp = [] #O(1)
+for item in duration_log.items(): #O(n)
+    temp.append([item[0],sum([time for time in item[1]])]) #O(m) where m <= n/2
+
+print(max(temp,key = lambda x: x[1])[0],"spent the longest time,",max(temp,key = lambda x: x[1])[1],"seconds, on the phone during September 2016.") #O(2n)
 
 
-for item in calls: #O(n)
-    item[3] = float(item[3]) #O(1); convert call duration to float
-    for number in item[:2]: #O(1)x2
-        if not [a for a in duration_log if a[0] == number]: #O(1): list comprehension; check if number is unique
-            duration_log.append([number,item[3]]) #O(1)
-        else:
-            #not unique; add to duration
-            #find number and add duration to item[3]
-            [a for a in duration_log if a[0] == number][0][1] += item[3] #O(1); list comprehension to add time to non-unique numbers
-
-print(list(map(max,zip(*duration_log)))[0],"spent the longest time,",list(map(max,zip(*duration_log)))[1],"seconds, on the phone during September 2016.") #O(n) -> zip

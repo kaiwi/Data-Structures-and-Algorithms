@@ -1,57 +1,67 @@
-# Do NOT change this code!
-import numpy as np
-import pandas as pd
-
-# np.random.seed(25)
-# ar = np.random.randn(1000)
-# ar = ar * 100
-# ar = ar.astype('int8')
-# ar = ar.reshape((200, 5))
-#
-# max = np.max(ar)
-# min = np.min(ar)
-# mean = np.mean(ar)
-# print(max)
-# print(min)
-# print(mean)
-#
-# print(ar)
-# locA = ar[7, 1]
-# print(locA)
-# g_mean = ar > np.mean(ar)
-# print(np.count_nonzero(g_mean))
-#
-# # Using numpy, what is the sum of the values of the array ar that are greater than -5 and less than or equal to 20.
-# # Create array of bool to pass to np.sum() where condition is true
-# conditions = (ar > -5) & (ar < 20)
-# # print(conditions)
-# print(np.sum(ar, None, None, None, np._NoValue, np._NoValue, conditions))
-# print(np.where(ar == max))
-
-################################################
-def scrub(col):
-    data = pd.read_csv('2019_production_reports.csv', usecols=col)
-    return data.dropna()
-
-#data = scrub(['report_date','oil_vol'])
-#print(data.loc[data['oil_vol'].idxmax()])
-df = scrub(['api_county_code','report_date'])
-print(df)
+# Active Directory
 
 
-dates = df.loc[df['report_date'].str[-2:] == '19']
-print(dates)
-print(dates.groupby(['api_county_code']).size().idxmax())
+class Group(object):
+    def __init__(self, _name):
+        self.name = _name
+        self.groups = []
+        self.users = []
+
+    def add_group(self, group):
+        self.groups.append(group)
+
+    def add_user(self, user):
+        self.users.append(user)
+
+    def get_groups(self):
+        return self.groups
+
+    def get_users(self):
+        return self.users
+
+    def get_name(self):
+        return self.name
 
 
-# Total gas flared
+parent = Group("parent")
+child = Group("child")
+sub_child = Group("subchild")
+
+sub_child_user = "sub_child_user"
+sub_child.add_user(sub_child_user)
+
+child.add_group(sub_child)
+parent.add_group(child)
 
 
+def return_is_user_in_group(user, group):
+    """
+    Recursive function to search groups for user.
+    :param user: string
+    :param group: Group
+    :return: True is user is in group. Otherwise, False.
+    """
+    if user in group.get_users():  # check for user in group list
+        # print("IN GROUP:{}".format(group.name))
+        return True
+    for member in group.get_groups():  # recursion through all group list elements
+        # print("Searching group:{}".format(member.name))
+        return_is_user_in_group(user, member)
+        return False
 
-#oil_max = data['oil_vol'].idxmax()
-#print(data['oil_vol'].argmax())
-#print(data.loc([776424],'report_date'))
+
+def is_user_in_group(user, group):
+    """
+    Return True if user is in the group, False otherwise.
+
+    Args:
+      user(str): user name/id
+      group(class:Group): group to check user membership against
+    """
+
+    return return_is_user_in_group(user, group)
 
 
-
-
+print(is_user_in_group(sub_child_user, parent))
+print(is_user_in_group(sub_child_user, child))
+print(is_user_in_group(sub_child_user, sub_child))

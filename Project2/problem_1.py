@@ -1,8 +1,15 @@
 # LRU Cache
-
-# LRU_Cache class
-class LRU_Cache(object):
+class LRUCache(object):
+    """
+    Class objects model a Least Recently Used(LRU) cache with limited capacity. When capacity is exceeded, the LRU node
+    is removed from the cache.
+    """
     def __init__(self, capacity=5, initial_size=8):  # Bucket size set to minimum size to achieve < 0.7 load factor
+        """
+        Constructor for LRUCache.
+        :param capacity: Initial size of LRUCache.
+        :param initial_size: Initial size of Hash Map bucket array.
+        """
         # Initialize class variables
         self.capacity = capacity
         self.current_cache_size = 0
@@ -16,18 +23,23 @@ class LRU_Cache(object):
         self.p = 31
 
     def set(self, key, value):
-        # Set the value if the key is not present in the cache. If the cache is at capacity remove the oldest item.
+        """
+        Sets the CacheNode at the top of the cache if the key is not present in the cache. Otherwise, resorts the cache
+        to place the key CacheNode at the top of the cache. If the cache is at capacity, removes the oldest item.
+        :param key: Unique integer ID.
+        :param value: Integer
+        :return: None
+        """
         if self.get(key) == -1:  # Key not in cache
             if self.current_cache_size == 5:  # Full cache
-                #print("^^^FULL CACHE^^^")
                 new_tail = self.tail.previous
                 self.tail.previous = None  # Remove old tail
-                self.bucket_array[self.get_bucket_index(self.tail.key)] = CacheNode()  # Vacate the bucket array at bucket index
+                self.bucket_array[
+                    self.get_bucket_index(self.tail.key)] = CacheNode()  # Vacate the bucket array at bucket index
                 self.tail = new_tail  # Set new tail
                 self.tail.next = None
                 self.current_cache_size -= 1  # Update cache_size
                 self.set_head(key, value)  # Set new head
-
             else:  # Space available in cache
                 self.set_head(key, value)  # Set new head
         else:  # Key is in cache
@@ -36,12 +48,9 @@ class LRU_Cache(object):
                 if node.key == key:
                     if not node.previous:  # If key at head
                         break  # Do nothing
-                    # if not node.previous and node.key == key:
-                    #     return
                     elif not node.next:  # If key at tail
                         self.tail = node.previous  # Set previous to tail
                         node.previous.next = None  # Remove tail
-                    # elif not node.next and node.key == key:
                     else:  # If key in middle
                         node.previous.next = node.next  # Attach previous to next node
                         node.next.previous = node.previous  # Attach next to previous
@@ -54,47 +63,62 @@ class LRU_Cache(object):
         return
 
     def set_head(self, key, value):
-        # Sets a new LRU Cache head.
-        #print("SETTING NEW HEAD")
+        """
+        Sets a new LRUCache head.
+        :param key: Unique integer ID.
+        :param value: Integer
+        :return: None
+        """
+
         new_node = CacheNode(key, value)
-        #print("new_node:\n{}".format(new_node))
         bucket_index = self.get_bucket_index(key)  # Assign bucket index for new CacheNode
         self.bucket_array[bucket_index] = new_node  # Store new CacheNode in bucket_array at bucket_index
-        #print("bucket_array[{}]:\n{}".format(bucket_index, self.bucket_array[bucket_index]))
+
         if self.head:  # Cache is not empty
             old_head = self.head
-            #print("old_head:\n{}".format(old_head))
             new_node.next = old_head  # Point new_node to old_head
             old_head.previous = new_node  # Point old_head to new_head
-            #print("new_node:\n{}".format(new_node))
+
         else:  # Cache is empty
             self.tail = new_node
         self.head = new_node  # Update head
         self.current_cache_size += 1  # Increment current_cache_size
-        # print("set_head LRU_Cache:\n", self.__repr__()
+
         return
 
     def get(self, key):
-        # Retrieve item from provided key. Return -1 if nonexistent.
+        """
+        Retrieve item from provided key.
+        :param key: Unique integer ID.
+        :return: Return value of CacheNode at key; -1 if non-existent.
+        """
+
         bucket_index = self.get_bucket_index(key)
-        #print("bucket_index: ", bucket_index)
+
         if self.current_cache_size == 0:  # Empty cache
             return -1
         node = self.bucket_array[bucket_index]  # Grab CacheNode at bucket_index; O(1)
-        #print("GET NODE: {}".format(node))
+
         if node.key == key:
-            #print("*-\CACHE HIT/-*")
-            print(node.value)
             return node.value  # Cache hit
-        #print("*-/CACHE MISS\-*")
-        print(-1)
         return -1  # Cache miss
 
     def get_bucket_index(self, key):
+        """
+        Passes key to class method get_hash_code. Returns a compressed hash integer to be used as the index for key in
+        the Hash Map bucket array.
+        :param key: Unique integer ID.
+        :return: Integer
+        """
         bucket_index = self.get_hash_code(key)
         return bucket_index
 
     def get_hash_code(self, key):
+        """
+        Generates a compressed hash integer to be used as Hash Map indices.
+        :param key: Unique integer ID.
+        :return: Integer
+        """
         key = str(key)
         num_buckets = len(self.bucket_array)
         current_coefficient = 1
@@ -118,7 +142,7 @@ class LRU_Cache(object):
         while node:
             if node.previous == None:  # head
                 s += "HEAD\n{}\n".format(node)
-            elif node.next == None: # tail
+            elif node.next == None:  # tail
                 s += "TAIL\n{}\n".format(node)
             else:
                 s += "{}\n".format(node)
@@ -130,11 +154,17 @@ class LRU_Cache(object):
                         self.tail,
                         )
 
-# CacheNode class
+
 class CacheNode(object):
-    # CacheNodes combine Hash Maps [to achieve O(1) set() & get()] and doubly linked lists
-    # [to simulate LRU movement]
+    """
+    A CacheNode object combines Hash Maps and doubly linked lists to simulate LRU cache behavior.
+    """
     def __init__(self, key=None, value=None):
+        """
+        Constructor for CacheNode.
+        :param key: Unique integer ID.
+        :param value: Integer
+        """
         self.key = key
         self.value = value
         self.previous = None
@@ -153,32 +183,39 @@ class CacheNode(object):
 
         return s
 
+
 def print_bucket_array(cache):
-    #Prints the bucket array for a LRU cache
-    for index,value in enumerate(cache.bucket_array):
-        print("Index[{}]\n{}".format(index,value))
+    """
+    Prints the bucket array for a LRU cache.
+    :param cache: LRUCache
+    :return:
+    """
+    for index, value in enumerate(cache.bucket_array):
+        print("Index[{}]\n{}".format(index, value))
     return
 
-#Test Cases
-our_cache = LRU_Cache()
-our_cache.set(1, 1)
-our_cache.set(2, 2)
-our_cache.set(3, 3)
-our_cache.set(4, 4)
-our_cache.set(5, 5)
-our_cache.set(6, 6)
-our_cache.set(4, 4)
-our_cache.set(2, 2)
-our_cache.set(5, 5)
-our_cache.set(11, 11)
-our_cache.set(13, 13)
-print_bucket_array(our_cache)
-print(our_cache)
-#
-#
-our_cache.get(1)  # returns 1
-our_cache.get(2)  # returns 2
-our_cache.get(9)  # returns -1 because 9 is not present in the cache
-#
-#
-our_cache.get(6)      # returns -1 because the cache reached it's capacity and 6 was the least recently used entry
+
+if __name__ == "__main__":
+    # Test Cases
+    our_cache = LRUCache()
+    our_cache.set(1, 1)
+    our_cache.set(2, 2)
+    our_cache.set(3, 3)
+    our_cache.set(4, 4)
+    our_cache.set(5, 5)
+    our_cache.set(6, 6)
+    our_cache.set(4, 4)
+    our_cache.set(2, 2)
+    our_cache.set(5, 5)
+    our_cache.set(11, 11)
+    our_cache.set(13, 13)
+    print_bucket_array(our_cache)
+    print(our_cache)
+    #
+    #
+    our_cache.get(1)  # returns 1
+    our_cache.get(2)  # returns 2
+    our_cache.get(9)  # returns -1 because 9 is not present in the cache
+    #
+    #
+    our_cache.get(6)  # returns -1 because the cache reached it's capacity and 6 was the least recently used entry

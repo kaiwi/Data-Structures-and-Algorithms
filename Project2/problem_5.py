@@ -87,7 +87,6 @@ class Blockchain:
         # check load factor
         current_load_factor = self.num_entries / len(self.bucket_array)
         if current_load_factor > self.load_factor:
-            print(new_block)
             self.num_entries = 0
             self._rehash()
 
@@ -100,7 +99,9 @@ class Blockchain:
         :return: Block
         """
         # print(self.view_hash_map())
-        print("get previous_hash:{}".format(key))
+        # print("get previous_hash:{}".format(key))
+        if key == 0:  # origin block
+            return self.head
         bucket_index = self.get_bucket_index(key)
         # print("get bucket_index:{}".format(bucket_index))
         bucket_head = self.bucket_array[bucket_index]
@@ -115,7 +116,7 @@ class Blockchain:
         # block = self.bucket_array[bucket_index]  # grab block at bucket_index
         # if bucket_head.hash == key:  # block hash in Hash Map
         #     return bucket_head
-        print("did not find previous_hash:{}".format(key))
+        # print("did not find previous_hash:{}".format(key))
         return -1
 
     def get_bucket_index(self, key):
@@ -204,8 +205,6 @@ class Blockchain:
         s = "END OF BLOCK CHAIN\n"
         tail = self.tail
         count = self.num_entries
-        print("COUNT:{}".format(count))
-        print(self.tail)
         while count > 0:
             s += tail.__repr__()
             s += "       |\n"
@@ -220,9 +219,8 @@ class Blockchain:
 if __name__ == "__main__":
 
     B = Blockchain()
-    for _ in range(11):
+    for _ in range(100):
         B.set("New block:{}".format(_ + 1))
-    print(B.get(0))
     print(B.view_hash_map())
     print(B)
 

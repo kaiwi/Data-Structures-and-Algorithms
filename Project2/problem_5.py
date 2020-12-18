@@ -136,6 +136,7 @@ class Blockchain:
         return hash_code % num_buckets  # one last compression before returning
 
     def _rehash(self):
+        print(self.view_hash_map())
         old_num_buckets = len(self.bucket_array)
         old_bucket_array = self.bucket_array
         num_buckets = 2 * old_num_buckets
@@ -143,8 +144,22 @@ class Blockchain:
         for key, block in enumerate(old_bucket_array):
             if block:
                 # cannot create new Block or block hashes will change so only the bucket index needs to be rehashed
-                # print("Moving index [{}] to index [{}]".format(key, self.get_bucket_index(block.__hash__())))
-                self.bucket_array[self.get_bucket_index(block.__hash__())] = block
+                while block is not None:  # traverse Separate Chain to rehash every Block
+                    new_bucket_index = self.get_bucket_index(block.__hash__())  # generate a new bucket index
+                    new_bucket_head = self.bucket_array[new_bucket_index]
+                    # print("Moving old_bucket_index [{}] to new_bucket_index [{}]".format(key, new_bucket_index))
+
+                    next_chain = block.next  # store rest of old chain (if any)
+                    block.next = None  # cut old separate chain
+
+                    # collision handling
+                    check_new_bucket = self.bucket_array[new_bucket_index]
+                    if check_new_bucket is not None:  # index already contains a Block
+                        check_new_bucket.next = new_bucket_head  # add block to new separate chain
+                    else:
+                        self.bucket_array[new_bucket_index] = block  # store block in empty bucket
+                    # print(self.view_hash_map())
+                    block = next_chain
 
     def view_hash_map(self):
         """
@@ -167,18 +182,20 @@ class Blockchain:
                                                           bucket_head.previous_hash)
                     bucket_head = bucket_head.next
 
-
         return output
 
     def __repr__(self):
         s = "END OF BLOCK CHAIN\n"
         tail = self.tail
-        while tail.index >= 0:
-            s += tail
+        while tail.index > 0:
+            print("ENTER INDEX:{}".format(tail.index))
+            print("ENTER HASH:{}".format(tail.__hash__()))
+            s += tail.__repr__()
             s += "       |\n"
             s += "       |\n"
-            s += "      \|/\n"
+            s += "      \|/"
             tail = self.get(tail.previous_hash)
+            #print("EXIT INDEX:{}".format(tail.index))
         s += "BEGINNING OF BLOCK CHAIN\n"
 
         return s
@@ -190,7 +207,4 @@ if __name__ == "__main__":
     for _ in range(11):
         B.set("New block:{}".format(_+1))
     print(B.view_hash_map())
-    print(B.tail)
-
-
-
+    print(B)

@@ -1,6 +1,7 @@
 # Blockchain
 
 import hashlib
+import time
 from datetime import datetime
 
 
@@ -17,6 +18,7 @@ class Block:
         self.data = data
         self.previous_hash = previous_hash
         self.timestamp = datetime.utcnow().strftime("%H:%M:%S %#m/%#d/%Y")  # Timestamp generated on Windows.
+        self.hash = self.calc_hash()
         self.next = None  # to handle collisions
 
     def calc_hash(self):
@@ -29,15 +31,12 @@ class Block:
 
         return sha.hexdigest()
 
-    def __hash__(self):
-        return self.calc_hash()
-
     def __repr__(self):
         s = "\n"
         s += "        Index: {}\n".format(self.index)
         s += "    Timestamp: {}\n".format(self.timestamp)
         s += "         Data: \"{}\"\n".format(self.data)
-        s += "  SHA256 Hash: {}\n".format(self.__hash__())
+        s += "  SHA256 Hash: {}\n".format(self.hash)
         s += "Previous Hash: {}\n".format(self.previous_hash)
         return s
 
@@ -57,7 +56,7 @@ class Blockchain:
         self.num_entries = 0
         self.load_factor = 0.7
 
-        bucket_index = self.get_bucket_index(self.head.__hash__())  # put constructor block in Hash Map
+        bucket_index = self.get_bucket_index(self.head.hash)  # put constructor block in Hash Map
         self.bucket_array[bucket_index] = self.head
 
     def set(self, value):
@@ -69,22 +68,26 @@ class Blockchain:
         :return: None
         """
         # make a new block
-        previous_hash = self.tail.__hash__()
-        new_block = Block(self.tail.index+1, value, previous_hash)
+        previous_hash = self.tail.hash
+        new_block = Block(self.tail.index + 1, value, previous_hash)
         self.tail = new_block  # update tail
 
         # check for collisions and  implement separate chaining to handle collisions
-        check_bucket_index = self.get_bucket_index(new_block.__hash__())
+        check_bucket_index = self.get_bucket_index(new_block.hash)
         bucket_head = self.bucket_array[check_bucket_index]
         if self.bucket_array[check_bucket_index]:  # index already contains a Block
-            # print("COLLISION @ index [{}]".format(check_bucket_index))
-            # print(new_block, self.bucket_array[check_bucket_index])
-            new_block.next = bucket_head
-        self.bucket_array[check_bucket_index] = new_block  # add new_block to Hash Map
+            # print("BUCKET [{}] FILLED".format(check_bucket_index), bucket_head, bucket_head.next)
+            new_block.next = bucket_head  # place the current bucket block next in chain
+            # print(new_block)
+
+        # add new_block to Hash Map
+        self.bucket_array[check_bucket_index] = new_block
         self.num_entries += 1
 
-        current_load_factor = self.num_entries / len(self.bucket_array)  # check load factor
+        # check load factor
+        current_load_factor = self.num_entries / len(self.bucket_array)
         if current_load_factor > self.load_factor:
+            print(new_block)
             self.num_entries = 0
             self._rehash()
 
@@ -96,16 +99,23 @@ class Blockchain:
         :param key: Block hash.
         :return: Block
         """
+        # print(self.view_hash_map())
+        print("get previous_hash:{}".format(key))
         bucket_index = self.get_bucket_index(key)
+        # print("get bucket_index:{}".format(bucket_index))
         bucket_head = self.bucket_array[bucket_index]
-        while bucket_head is not None:  # check Linked List for key
-            if bucket_head.__hash__() == key:
+        while bucket_head is not None:  # check separate chain for key
+            # print("get bucket_head:{}".format(bucket_head))
+            # print("get bucket_head.next:{}".format(bucket_head.next))
+            # print(bucket_head.hash, key)
+            if bucket_head.hash == key:
                 return bucket_head
             bucket_head = bucket_head.next
 
-        block = self.bucket_array[bucket_index]  # grab block at bucket_index
-        if block.__hash__() == key:  # block hash in Hash Map
-            return block
+        # block = self.bucket_array[bucket_index]  # grab block at bucket_index
+        # if bucket_head.hash == key:  # block hash in Hash Map
+        #     return bucket_head
+        print("did not find previous_hash:{}".format(key))
         return -1
 
     def get_bucket_index(self, key):
@@ -136,7 +146,7 @@ class Blockchain:
         return hash_code % num_buckets  # one last compression before returning
 
     def _rehash(self):
-        print(self.view_hash_map())
+        # print(self.view_hash_map())
         old_num_buckets = len(self.bucket_array)
         old_bucket_array = self.bucket_array
         num_buckets = 2 * old_num_buckets
@@ -145,59 +155,65 @@ class Blockchain:
             if block:
                 # cannot create new Block or block hashes will change so only the bucket index needs to be rehashed
                 while block is not None:  # traverse Separate Chain to rehash every Block
-                    new_bucket_index = self.get_bucket_index(block.__hash__())  # generate a new bucket index
-                    new_bucket_head = self.bucket_array[new_bucket_index]
-                    # print("Moving old_bucket_index [{}] to new_bucket_index [{}]".format(key, new_bucket_index))
-
-                    next_chain = block.next  # store rest of old chain (if any)
+                    self.num_entries += 1
+                    next_link = block.next  # store rest of old chain (if any)
                     block.next = None  # cut old separate chain
 
+                    new_bucket_index = self.get_bucket_index(block.hash)  # generate a new bucket index
+                    # print("Moving old_bucket_index [{}][{}] to new_bucket_index [{}]".format(key,
+                    #                                                                          block.index,
+                    #                                                                          new_bucket_index))
+
                     # collision handling
-                    check_new_bucket = self.bucket_array[new_bucket_index]
-                    if check_new_bucket is not None:  # index already contains a Block
-                        check_new_bucket.next = new_bucket_head  # add block to new separate chain
-                    else:
-                        self.bucket_array[new_bucket_index] = block  # store block in empty bucket
-                    # print(self.view_hash_map())
-                    block = next_chain
+                    if self.bucket_array[new_bucket_index] is not None:  # bucket is occupied
+                        block.next = self.bucket_array[new_bucket_index]  # add occupied bucket to separate chain
+
+                    self.bucket_array[new_bucket_index] = block  # store block in bucket
+                    block = next_link  # continue down the block separate chain
 
     def view_hash_map(self):
         """
         Returns a string representation of the Hash Map.
         :return: String
         """
+        # print("HASH MAP")
         output = "\nHash Map:"
         for bucket_index, bucket in enumerate(self.bucket_array):
+            # time.sleep(2)
+            # print(bucket_index,bucket)
             if bucket is None:
                 output += '\n[{}] '.format(bucket_index)
             else:
                 bucket_head = self.bucket_array[bucket_index]
-                # print("bucket_head is {}".format(bucket_head))
                 while bucket_head is not None:  # check Linked List for key
+                    # print("in view hash chain traversal")
+                    # print("chain traversal bucket_head is [{}]".format(bucket_head))
+                    # print("chain traversal bucket_head.next is [{}]".format(bucket_head.next))
+                    # time.sleep(1)
                     output += '\n[{}]'.format(bucket_index)
                     output += ' ({}|{}|{}|{}|{}) '.format(bucket_head.index,
                                                           bucket_head.timestamp,
                                                           bucket_head.data,
-                                                          bucket_head.__hash__(),
+                                                          bucket_head.hash,
                                                           bucket_head.previous_hash)
                     bucket_head = bucket_head.next
-
+        # print("END OF HASH MAP")
         return output
 
     def __repr__(self):
         s = "END OF BLOCK CHAIN\n"
         tail = self.tail
-        while tail.index > 0:
-            print("ENTER INDEX:{}".format(tail.index))
-            print("ENTER HASH:{}".format(tail.__hash__()))
+        count = self.num_entries
+        print("COUNT:{}".format(count))
+        print(self.tail)
+        while count > 0:
             s += tail.__repr__()
             s += "       |\n"
             s += "       |\n"
             s += "      \|/"
             tail = self.get(tail.previous_hash)
-            #print("EXIT INDEX:{}".format(tail.index))
-        s += "BEGINNING OF BLOCK CHAIN\n"
-
+            count -= 1
+        s += "\nBEGINNING OF BLOCK CHAIN\n"
         return s
 
 
@@ -205,6 +221,8 @@ if __name__ == "__main__":
 
     B = Blockchain()
     for _ in range(11):
-        B.set("New block:{}".format(_+1))
+        B.set("New block:{}".format(_ + 1))
+    print(B.get(0))
     print(B.view_hash_map())
     print(B)
+

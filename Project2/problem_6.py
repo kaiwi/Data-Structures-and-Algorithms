@@ -91,8 +91,7 @@ def intersection(llist_1, llist_2):
     """
     llist_intersection = LinkedList()
     set_1, set_2 = llist_1.to_set(), llist_2.to_set()
-    set_intersection = set_1.intersection(set_2)  # intersection set; O(min(len(m), len(n)))
-    while len(set_intersection) > 0:
+    while len(set_1.intersection(set_2)) > 0:  # intersection set; O(min(len(m), len(n)))
         llist_intersection.append(set_intersection.pop())  # pop elements off set and convert to a LinkedList
 
     return llist_intersection

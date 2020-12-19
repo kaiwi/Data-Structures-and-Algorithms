@@ -231,7 +231,6 @@ def huffman_encoding(data):
         output = ""
     else:
         code = in_order(hufftree.root, 0, code)
-        # print(code)
         for char in data:
             output += str(code[char])
     return output, hufftree  # returns encoded string and Huffman Tree
@@ -245,26 +244,19 @@ def huffman_decoding(data, tree):
     :return: string (decoded Huffman data as output)
     """
     output = ""
-    data = list(data)
+    data = deque(list(data))
 
     def traverse_decode(root, code):
-        bit = code.pop(0)
-        # print("root:{} bit:{}".format(root, int(bit)))
+        bit = code.popleft()
         if int(bit) == 0:
-            # print("GO LEFT")
             if type(root.left) is Node:
-                # print("DECODED:{}".format(root.left.character))
                 return root.left.character
             else:  # go to lower level
-                # print("to:{}".format(root.left))
                 return traverse_decode(root.left, code)
         else:
-            # print("GO RIGHT")
             if type(root.right) is Node:
-                # print("DECODED:{}".format(root.right.character))
                 return root.right.character
             else:  # Huffman node holding two highest frequency characters
-                # print("to:{}".format(root.right))
                 return traverse_decode(root.right, code)
 
     while len(data) > 0:  # decode the bit list
@@ -278,7 +270,6 @@ if __name__ == "__main__":
              "AAAAAAAA",
              "The quick brown fox jumps over the lazy dog",
              "Cozy sphinx waves quart jug of bad milk"]
-    # a_great_sentence = "The bird is the word"
     for a_great_sentence in tests:
         print(a_great_sentence)
         print("The size of the data is: {}\n".format(sys.getsizeof(a_great_sentence)))

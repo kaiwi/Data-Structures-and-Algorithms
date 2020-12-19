@@ -1,4 +1,5 @@
 # LRU Cache
+
 class LRUCache(object):
     """
     Class objects model a Least Recently Used(LRU) cache with limited capacity. When capacity is exceeded, the LRU node
@@ -14,7 +15,7 @@ class LRUCache(object):
         self.capacity = capacity
         self.current_cache_size = 0
 
-        # Use a DoublyLinkedList data structure to simulate CacheNodes moving based on new set() keys
+        # Use a LinkedList data structure to simulate CacheNodes moving based on new set() keys
         self.head = None
         self.tail = None
 
@@ -203,19 +204,20 @@ if __name__ == "__main__":
     our_cache.set(3, 3)
     our_cache.set(4, 4)
     our_cache.set(5, 5)
-    our_cache.set(6, 6)
-    our_cache.set(4, 4)
+    our_cache.set(6, 6)  # to test exceeding cache capacity: expect 6-5-4-3-2, 1 dropped.
+    print(our_cache.get(1))  # returns -1 cache capacity reached and 1 was the least recently used entry
+    print(our_cache)
+    our_cache.set(4, 4)  # to test key in cache being moved to top of cache and cache reordered: expect 4-6-5-3-2
+    print(our_cache)
     our_cache.set(2, 2)
     our_cache.set(5, 5)
     our_cache.set(11, 11)
     our_cache.set(13, 13)
-    print_bucket_array(our_cache)
-    print(our_cache)
     #
     #
-    our_cache.get(1)  # returns 1
-    our_cache.get(2)  # returns 2
+    print(our_cache.get(5))  # returns 5
+    print(our_cache.get(11))  # returns 11
     our_cache.get(9)  # returns -1 because 9 is not present in the cache
     #
     #
-    our_cache.get(6)  # returns -1 because the cache reached it's capacity and 6 was the least recently used entry
+

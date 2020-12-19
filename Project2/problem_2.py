@@ -13,7 +13,7 @@ def find_files(suffix, path):
     There are no limit to the depth of the subdirectories can be.
 
     Args:
-      suffix(str): suffix if the file name to be found
+      suffix(str): suffix of the file name to be found
       path(str): path of the file system
 
     Returns:
@@ -24,10 +24,16 @@ def find_files(suffix, path):
     return return_find_files(suffix, path, suffix_paths)  # Pass list to recursive function
 
 def return_find_files(suffix, path, path_list):
+    """
+    Recursive helper to access all sub-folders in a path.
+    :param suffix: A string of target suffix.
+    :param path: A string of the path of the file system.
+    :param path_list: A list of all paths that match target suffix.
+    :return:
+    """
 
     for item in listdir(path):  # Iterate through files in path
         new_path = join(path, item)  # reconstruct complete path name
-        # print("item:{}\nis file?:{}\nis directory?:{}".format(item,isfile(new_path),isdir(new_path)))
         if isfile(new_path) and new_path.endswith(suffix):  # Check for suffix
             path_list.append(new_path)
         elif isdir(new_path):  # Recursive call when finding subdirectories

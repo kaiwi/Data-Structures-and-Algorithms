@@ -3,6 +3,7 @@
 from os.path import isdir, isfile, join
 from os import listdir, getcwd
 
+
 def find_files(suffix, path):
     """
     Find all files beneath path with file name suffix.
@@ -23,13 +24,14 @@ def find_files(suffix, path):
 
     return return_find_files(suffix, path, suffix_paths)  # Pass list to recursive function
 
+
 def return_find_files(suffix, path, path_list):
     """
     Recursive helper to access all sub-folders in a path.
     :param suffix: A string of target suffix.
     :param path: A string of the path of the file system.
-    :param path_list: A list of all paths that match target suffix.
-    :return:
+    :param path_list: A list of paths that match target suffix.
+    :return: A list of all paths that match target suffix.
     """
 
     for item in listdir(path):  # Iterate through files in path

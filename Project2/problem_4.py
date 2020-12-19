@@ -41,11 +41,9 @@ def return_is_user_in_group(user, group):
     :param group: Group
     :return: True is user is in group. Otherwise, False.
     """
-    if user in group.get_users():  # check for user in group list
-        # print("IN GROUP:{}".format(group.name))
+    if user in set(group.get_users()):  # check for user in group list
         return True
     for member in group.get_groups():  # recursion through all group list elements
-        # print("Searching group:{}".format(member.name))
         return_is_user_in_group(user, member)
         return False
 

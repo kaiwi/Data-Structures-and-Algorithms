@@ -179,7 +179,7 @@ class Blockchain:
     def __repr__(self):
         s = "END OF BLOCK CHAIN\n"
         tail = self.tail
-        count = self.num_entries
+        count = self.tail.index
         while count > 0:
             s += tail.__repr__()
             s += "       |\n"
@@ -187,11 +187,33 @@ class Blockchain:
             s += "      \|/"
             tail = self.get(tail.previous_hash)
             count -= 1
+        s += self.head.__repr__()
         s += "\nBEGINNING OF BLOCK CHAIN\n"
         return s
 
 
 if __name__ == "__main__":
+
+    #  Functional test
+    B = Blockchain()
+    for _ in range(5):
+        B.set("New block:{}".format(_ + 1))
+    print(B.view_hash_map())
+    print(B)
+
+    # No Block data test
+    C = Blockchain()
+    C.set("")
+    print(C.view_hash_map())
+    print(C)
+
+    # Empty Blockchain test
+
+    D = Blockchain()
+    print(D.view_hash_map())
+    print(D)
+
+    # Rehash and collision test
 
     B = Blockchain()
     for _ in range(100):

@@ -91,14 +91,15 @@ def intersection(llist_1, llist_2):
     """
     llist_intersection = LinkedList()
     set_1, set_2 = llist_1.to_set(), llist_2.to_set()
-    while len(set_1.intersection(set_2)) > 0:  # intersection set; O(min(len(m), len(n)))
+    set_intersection = set_1.intersection(set_2)  # intersection set; O(min(len(m), len(n)))
+    while len(set_intersection) > 0:  # intersection set; O(min(len(m), len(n)))
         llist_intersection.append(set_intersection.pop())  # pop elements off set and convert to a LinkedList
 
     return llist_intersection
 
 
 if __name__ == "__main__":
-    # Test case 1
+    # Test case 1: Common elements.
 
     linked_list_1 = LinkedList()
     linked_list_2 = LinkedList()
@@ -115,7 +116,7 @@ if __name__ == "__main__":
     print("UNION:{}".format(union(linked_list_1, linked_list_2)))
     print("INTERSECTION: {}".format(intersection(linked_list_1, linked_list_2)))
 
-    # Test case 2
+    # Test case 2: No common elements.
 
     linked_list_3 = LinkedList()
     linked_list_4 = LinkedList()
@@ -132,7 +133,7 @@ if __name__ == "__main__":
     print("UNION:{}".format(union(linked_list_3, linked_list_4)))
     print("INTERSECTION: {}".format(intersection(linked_list_3, linked_list_4)))
 
-    # Test case 3
+    # Test case 3: Equivalent linked lists.
 
     linked_list_5 = LinkedList()
     linked_list_6 = LinkedList()
@@ -148,3 +149,39 @@ if __name__ == "__main__":
 
     print("UNION:{}".format(union(linked_list_5, linked_list_6)))
     print("INTERSECTION: {}".format(intersection(linked_list_5, linked_list_6)))
+
+    # Test case 4: One empty list.
+
+    linked_list_7 = LinkedList()
+    linked_list_8 = LinkedList()
+
+    element_1 = []
+    element_2 = [1, 1, 1, 1]
+
+    for i in element_1:
+        linked_list_7.append(i)
+
+    for i in element_2:
+        linked_list_8.append(i)
+
+    print("UNION:{}".format(union(linked_list_7, linked_list_8)))
+    print("INTERSECTION: {}".format(intersection(linked_list_7, linked_list_8)))
+
+    # Test case 5: Two empty lists.
+
+    linked_list_9 = LinkedList()
+    linked_list_10 = LinkedList()
+
+    element_1 = []
+    element_2 = []
+
+    for i in element_1:
+        linked_list_9.append(i)
+
+    for i in element_2:
+        linked_list_10.append(i)
+
+    print("UNION:{}".format(union(linked_list_9, linked_list_10)))
+    print("INTERSECTION: {}".format(intersection(linked_list_9, linked_list_10)))
+
+

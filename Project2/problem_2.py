@@ -20,6 +20,8 @@ def find_files(suffix, path):
     Returns:
        a list of paths
     """
+    if not isdir(path):  # not a valid directory
+        return None
     suffix_paths = list()  # Create a list to store path names of files with suffix
 
     return return_find_files(suffix, path, suffix_paths)  # Pass list to recursive function
@@ -44,10 +46,18 @@ def return_find_files(suffix, path, path_list):
     return path_list
 
 
-suffix = ".c"
-path = getcwd()
+if __name__ == "__main__":
+    suffixes = [".c",
+                ".gitkeep",
+                ".exe",
+                ""]
+    paths = [getcwd(), "", "banana"]
 
-print(find_files(suffix, path))
+    for suffix in suffixes:
+        print("File paths with suffix '{}': \n{}\n".format(suffix, find_files(suffix, paths[0])))
+
+    for path in paths:
+        print("'{}' file paths from root '{}': \n{}\n".format(suffixes[0], path, find_files(suffixes[0], path)))
 
 # Sample Directory Structure
 # ./testdir

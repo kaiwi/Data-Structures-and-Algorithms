@@ -31,6 +31,8 @@ class LRUCache(object):
         :param value: Integer
         :return: None
         """
+        if key is None:  # do nothing if key is None
+            return
         if self.get(key) == -1:  # Key not in cache
             if self.current_cache_size == 5:  # Full cache
                 new_tail = self.tail.previous
@@ -197,7 +199,7 @@ def print_bucket_array(cache):
 
 
 if __name__ == "__main__":
-    # Test Cases
+    # LRU cache operational test cases
     our_cache = LRUCache()
     our_cache.set(1, 1)
     our_cache.set(2, 2)
@@ -209,15 +211,13 @@ if __name__ == "__main__":
     print(our_cache)
     our_cache.set(4, 4)  # to test key in cache being moved to top of cache and cache reordered: expect 4-6-5-3-2
     print(our_cache)
-    our_cache.set(2, 2)
-    our_cache.set(5, 5)
-    our_cache.set(11, 11)
-    our_cache.set(13, 13)
-    #
-    #
-    print(our_cache.get(5))  # returns 5
-    print(our_cache.get(11))  # returns 11
-    our_cache.get(9)  # returns -1 because 9 is not present in the cache
-    #
-    #
+
+    #  LRU cache input test cases
+    new_cache = LRUCache()
+    new_cache.set(-1, 25)  # negative input
+    new_cache.set(None, 25)  # no input
+    new_cache.set('a', 25)  # string input
+    print(new_cache)
+
+
 

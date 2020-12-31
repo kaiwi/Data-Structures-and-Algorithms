@@ -1,6 +1,6 @@
 # File Recursion
 
-from os.path import isdir, isfile, join
+from os.path import isdir, isfile, join, split
 from os import listdir, getcwd
 
 
@@ -20,9 +20,11 @@ def find_files(suffix, path):
     Returns:
        a list of paths
     """
-    if not isdir(path):  # not a valid directory
-        return None
     suffix_paths = list()  # Create a list to store path names of files with suffix
+    if not isdir(path) and not isfile(path):  # not a valid path
+        return None
+    elif isfile(path):  # path is a file; pass only directory as path to helper
+        path, file = split(path)
 
     return return_find_files(suffix, path, suffix_paths)  # Pass list to recursive function
 
@@ -51,10 +53,13 @@ if __name__ == "__main__":
                 ".gitkeep",
                 ".exe",
                 ""]
-    paths = [getcwd(), "", "banana"]
+    paths = [getcwd(),
+             '',
+             'banana',
+             getcwd() +'\\testdir\subdir1\\a.c']
 
     for suffix in suffixes:
-        print("File paths with suffix '{}': \n{}\n".format(suffix, find_files(suffix, paths[0])))
+        print("File paths with suffix r'{}': \n{}\n".format(suffix, find_files(suffix, paths[0])))
 
     for path in paths:
         print("'{}' file paths from root '{}': \n{}\n".format(suffixes[0], path, find_files(suffixes[0], path)))

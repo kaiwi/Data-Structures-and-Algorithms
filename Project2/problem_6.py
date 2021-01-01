@@ -71,13 +71,10 @@ def union(llist_1, llist_2):
     :param llist_2: A LinkedList.
     :return: A LinkedList containing the union of the arguments.
     """
-    head_list = [llist_1.head, llist_2.head]
     llist_union = LinkedList()
-    for head in head_list:  # iterate through LinkedList heads
-        node = head
-        while node is not None:  # iterate through each LinkedList
-            llist_union.append(node.value)  # add a new node to union LinkedList; O(n*m)
-            node = node.next
+    set_union = llist_1.to_set().union(llist_2.to_set())
+    while len(set_union) > 0:  # union set; O(len(s)+len(t))
+        llist_union.append(set_union.pop())   # pop elements off set and convert to a LinkedList
 
     return llist_union
 
@@ -93,7 +90,7 @@ def intersection(llist_1, llist_2):
     set_1, set_2 = llist_1.to_set(), llist_2.to_set()
     set_intersection = set_1.intersection(set_2)  # intersection set; O(min(len(m), len(n)))
     while len(set_intersection) > 0:  # intersection set; O(min(len(m), len(n)))
-        llist_intersection.append(set_intersection.pop())  # pop elements off set and convert to a LinkedList
+        llist_intersection.append(set_intersection.pop())
 
     return llist_intersection
 

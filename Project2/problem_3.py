@@ -196,38 +196,37 @@ def huffman_encoding(data):
         code = in_order(heap[0], code)
         for char in data:
             output += str(code[char])
-    return output, heap  # returns encoded string and heap
+        print(view_heap(heap))
+        print(output)
+        print(code)
+    return output, heap
 
 
-def huffman_decoding(data, tree):
+def huffman_decoding(data, heap):
     """
     Decodes Huffman encoded data.
     :param data: string (Huffman encoded bits)
-    :param tree: HuffmanTree
+    :param heap: a heap of Nodes and HuffmanNodes
     :return: string (decoded Huffman data as output)
     """
-    if data is None:
-        print("Nothing to decode.")
-        output = data
-    else:
-        output = ""
-        data = deque(list(data))
+    output = ""
+    data = deque(list(data))
 
-        def traverse_decode(root, code):
-            bit = code.popleft()
-            if int(bit) == 0:
-                if type(root.left) is Node:
-                    return root.left.character
-                else:  # go to lower level
-                    return traverse_decode(root.left, code)
-            else:
-                if type(root.right) is Node:
-                    return root.right.character
-                else:  # Huffman node holding two highest frequency characters
-                    return traverse_decode(root.right, code)
+    def traverse_decode(root, code):
+        bit = code.popleft()
+        if int(bit) == 0:
+            if type(root.left) is Node:
+                return root.left.character
+            else:  # go to lower level
+                return traverse_decode(root.left, code)
+        else:
+            if type(root.right) is Node:
+                return root.right.character
+            else:  # go to lower level
+                return traverse_decode(root.right, code)
 
-        while len(data) > 0 and tree.root:  # decode the bit list
-            output += traverse_decode(tree.root, data)
+    while len(data) > 0:  # decode the bit list
+        output += traverse_decode(heap[0], data)
     return output
 
 
@@ -237,8 +236,7 @@ if __name__ == "__main__":
              "AAAAAAAA",
              "The quick brown fox jumps over the lazy dog",
              "Cozy sphinx waves quart jug of bad milk",
-             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUV",
-             ""]
+             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUV"]
     for a_great_sentence in tests:
         print(a_great_sentence)
         print("The size of the data is: {}\n".format(sys.getsizeof(a_great_sentence)))

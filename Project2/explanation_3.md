@@ -7,15 +7,13 @@ priority queue. To decode, I converted the input data string to a deque for O(1)
 
 Time complexity\
 huffman_encoding(): O(n^4 log^2 n)\
-O(n) char/freq dict creation, O(n log n) heappush, O(n) char to code\
-grow(): O(nh log n) - HuffmanTree insertion O(h) (h=tree height) with heappop node insertion O(n log n)\
-in_order(): O(h)\
+O(n) char/freq dict creation, O(n^2 log n) heappush (entire dict), O(n) char to code\
+in_order(): O(d) - depth of heap dependent\  
 huffman_decoding(): O(n) - complete data queue traversal needed to decode
 
 
 Space complexity\
-huffman_encoding(): O(n^3)\
+huffman_encoding(): O(n^3*m)\
 char-freq O(n) and char-code O(n) dictionaries and heap O(n) grow linearly with 
-character diversity in data.\
-huffman_decoding(): O(n) - len(data)
+character diversity in data. O(m) - len(encoded_data)
 

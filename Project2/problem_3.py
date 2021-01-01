@@ -147,7 +147,7 @@ def huffman_encoding(data):
     code = {}  # to store Huffman codes
     output = ""  # the Huffman encoded string
 
-    # Build the Huffman Tree
+    # Build the minheap
     for char in data:
         if char in char_bins.keys():
             char_bins.update({char: char_bins.get(char) + 1})  # store data as a dict by character and count
@@ -157,14 +157,11 @@ def huffman_encoding(data):
     for char, freq in char_bins.items():  # build heap
         heapq.heappush(heap, Node(char, freq))
 
-    while len(heap) > 1:
-        print("Encoding...")
-        one = heapq.heappop(heap)
-        two = heapq.heappop(heap)
-        print("Smallest in heap:        {} of type {}".format(one, type(one)))
-        print("Second smallest in heap: {} of type {}".format(two, type(two)))
-        heapq.heappush(heap, HuffmanNode(one, two))  # push HuffmanNode into heap
-        print("Heap: {}\nLength of heap: {}".format(heap, len(heap)))
+    if len(heap) == 1:  # single character data string
+        heapq.heappush(heap, HuffmanNode(heapq.heappop(heap), None))  # push HuffmanNode into heap
+    else:
+        while len(heap) > 1:
+            heapq.heappush(heap, HuffmanNode(heapq.heappop(heap), heapq.heappop(heap)))  # push HuffmanNode into heap
 
     # Generate the Encoded Data
     # traverse tree to build encoding dictionary
@@ -183,32 +180,22 @@ def huffman_encoding(data):
                 code_bins[root.left.character] = str(root.left.bit)
                 return code_bins
             else:
-                #level += 1
-
                 in_order(root.left, code_bins, level+"0")  # go left
-                print("Left\nlevel:{} , root: {} [{}|{}]".format(level, root, root.left, root.right))
+
                 if type(root.left) == Node:
-                    print("At character {}.".format(root.left.character))
                     code_bins[root.left.character] = level + str(root.left.bit)
-                    print("Adding {} with code {}.".format(root.left.character, code_bins[root.left.character]))
                 if type(root.right) == Node:
-                    print("At character {}.".format(root.right.character))
                     code_bins[root.right.character] = level + str(root.right.bit)
-                    print("Adding {} with code {}.".format(root.right.character, code_bins[root.right.character]))
 
                 in_order(root.right, code_bins, level+"1")  # go right
-                print("Right\nlevel:{} , root: {} [{}|{}]".format(level, root, root.left, root.right))
-                print(code_bins)
         return code_bins
 
-    if len(heap) == 0:
+    if len(heap) == 0:  # nothing to encode
         output = ""
     else:
         code = in_order(heap[0], code)
         for char in data:
             output += str(code[char])
-        print(view_heap(heap))
-        print(output)
     return output, heap  # returns encoded string and heap
 
 

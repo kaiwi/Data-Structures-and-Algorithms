@@ -9,6 +9,7 @@ class Queue():
     """
     Class objects model a simple queue.
     """
+
     def __init__(self):
         self.q = deque()
 
@@ -39,6 +40,7 @@ class Node(object):
     Class objects represent a single character and frequency value of a string. Objects stores a bit to be used during
     Huffman encoding/decoding.
     """
+
     def __init__(self, character, value):
         """
         Constructor for Node.
@@ -48,6 +50,9 @@ class Node(object):
         self.character = character
         self.value = value
         self.bit = None
+
+    def __lt__(self, other):
+        return other < self.value
 
     def __repr__(self):
         s = "[{}:{}]".format(self.character, self.value)
@@ -82,64 +87,51 @@ class HuffmanNode(object):
             self.value = self.left.value
         self.bit = None
 
-    def __str__(self):
+    def __lt__(self, other):
+        return other < self.value
+
+    def __repr__(self):
         s = "[{}]".format(self.value)
 
         return s
 
 
-class HuffmanTree(object):
+def view_heap(heap):
     """
-    A class to stores HuffmanNode and Nodes such that each parent is the sum of its children's value. Bits are
-    assigned to node children, left is 0, right is 1.
-
-    Attributes
-    ----------
-    root : HuffmanNode
-        A HuffmanNode.
-    count : int
-        Integer to count bit depth for encoding/decoding.
+    To visualize heaps.
+    :param heap: a heap of Nodes and HuffmanNodes.
+    :return: String representation of heap as a binary tree.
     """
+    level = 0
+    q = Queue()
+    visit_order = list()
+    node = heap[0]
+    q.enq((node, level))
+    while len(q) > 0:
+        node, level = q.deq()
+        if node is None:
+            visit_order.append(("<empty>", level))
+            continue
+        visit_order.append((node, level))
+        if type(node) != Node and node.left:
+            q.enq((node.left, level + 1))
+        else:
+            q.enq((None, level + 1))
 
-    def __init__(self, node=None):
-        """
-        Constructor for HuffmanTree.
-        :param node: A HuffmanNode.
-        """
-        self.root = node
-        self.count = 0
-
-    def __repr__(self):
-        level = 0
-        q = Queue()
-        visit_order = list()
-        node = self.root
-        q.enq((node, level))
-        while len(q) > 0:
-            node, level = q.deq()
-            if node is None:
-                visit_order.append(("<empty>", level))
-                continue
-            visit_order.append((node, level))
-            if node.left:
-                q.enq((node.left, level + 1))
-            else:
-                q.enq((None, level + 1))
-
-            if node.right:
-                q.enq((node.right, level + 1))
-            else:
-                q.enq((None, level + 1))
-        s = "Tree\n"
-        previous_level = -1
-        for i in range(len(visit_order)):
-            node, level = visit_order[i]
-            if level == previous_level:
-                s += " | " + str(node)
-            else:
-                s += "\n" + str(node)
-                previous_level = level
-        return s
+        if type(node) != Node and node.right:
+            q.enq((node.right, level + 1))
+        else:
+            q.enq((None, level + 1))
+    s = "Tree\n"
+    previous_level = -1
+    for i in range(len(visit_order)):
+        node, level = visit_order[i]
+        if level == previous_level:
+            s += " | " + str(node)
+        else:
+            s += "\n" + str(node)
+            previous_level = level
+    return s
 
 
 def huffman_encoding(data):
@@ -152,7 +144,6 @@ def huffman_encoding(data):
     print('String to encode: [{}]'.format(data))
     char_bins = {}  # to store character and frequency counts
     heap = []  # new heap
-    hufftree = HuffmanTree()
     code = {}  # to store Huffman codes
     output = ""  # the Huffman encoded string
 
@@ -164,76 +155,61 @@ def huffman_encoding(data):
             char_bins[char] = 1  # character not in dictionary
 
     for char, freq in char_bins.items():  # build heap
-        heapq.heappush(heap, (freq, char))
+        heapq.heappush(heap, Node(char, freq))
 
-    def grow(leaves, tree, count):
-        """
-        Populates and returns a HuffmanTree.
-        :param leaves: heap
-        :param tree: HuffmanTree
-        :param count: int (number of HuffmanNodes in HuffmanTree)
-        :return: HuffmanTree
-        """
-        if count == 0:  # empty tree
-            if len(leaves) == 0:  # No data to encode
-                return None
-            elif len(leaves) == 1:  # One character to encode
-                tree.root = HuffmanNode(heapq.heappop(leaves), None)
-                return tree
-            else:  # populate root
-                tree.root = HuffmanNode(heapq.heappop(leaves), heapq.heappop(leaves))
-                count += 1
-        else:
-            if len(leaves) == 2:  # this ensures the last two Nodes go to the right of a populated tree root
-                right = HuffmanNode(heapq.heappop(leaves), heapq.heappop(leaves))
-                tree.root = HuffmanNode(tree.root, right)
-                return tree
-            else:  # build tree
-                tree.root = HuffmanNode(tree.root, heapq.heappop(leaves))
-                count += 1
-        grow(leaves, tree, count)
-
-        return tree
-
-    hufftree = grow(heap, hufftree, 0)
-
-    if hufftree is None:  # no characters to encode
-        print("No data to encode.")
-        return None, None
+    while len(heap) > 1:
+        print("Encoding...")
+        one = heapq.heappop(heap)
+        two = heapq.heappop(heap)
+        print("Smallest in heap:        {} of type {}".format(one, type(one)))
+        print("Second smallest in heap: {} of type {}".format(two, type(two)))
+        heapq.heappush(heap, HuffmanNode(one, two))  # push HuffmanNode into heap
+        print("Heap: {}\nLength of heap: {}".format(heap, len(heap)))
 
     # Generate the Encoded Data
     # traverse tree to build encoding dictionary
-    def in_order(root, level, code_bins):
+
+    def in_order(root, code_bins, level=""):
         """
         Performs an in-order binary tree search on the HuffmanTree to produce the final encoded output.
         :param root: A HuffmanNode.
-        :param level: Integer to track recursion depth to be used to generate individual character bit codes.
         :param code_bins: A dictionary for individual character bit codes.
+        :param level: String to track recursion depth to be used to generate individual character bit codes.
         :return: A dictionary containing all individual character bit codes.
         """
+
         if type(root) == HuffmanNode:
             if not root.right:  # single character case
                 code_bins[root.left.character] = str(root.left.bit)
                 return code_bins
             else:
-                level += 1
-                in_order(root.left, level, code_bins)
+                #level += 1
+
+                in_order(root.left, code_bins, level+"0")  # go left
+                print("Left\nlevel:{} , root: {} [{}|{}]".format(level, root, root.left, root.right))
                 if type(root.left) == Node:
-                    code_bins[root.left.character] = str(root.left.bit) * level
+                    print("At character {}.".format(root.left.character))
+                    code_bins[root.left.character] = level + str(root.left.bit)
+                    print("Adding {} with code {}.".format(root.left.character, code_bins[root.left.character]))
                 if type(root.right) == Node:
-                    code_bins[root.right.character] = (str(root.left.bit) * (level - 1)) + str(root.right.bit)
-                else:
-                    code_bins[root.right.left.character] = (str(root.right.bit) * level) + str(root.left.bit)
-                    code_bins[root.right.right.character] = (str(root.right.bit) * level) + str(root.right.bit)
+                    print("At character {}.".format(root.right.character))
+                    code_bins[root.right.character] = level + str(root.right.bit)
+                    print("Adding {} with code {}.".format(root.right.character, code_bins[root.right.character]))
+
+                in_order(root.right, code_bins, level+"1")  # go right
+                print("Right\nlevel:{} , root: {} [{}|{}]".format(level, root, root.left, root.right))
+                print(code_bins)
         return code_bins
 
-    if hufftree.root is None:
+    if len(heap) == 0:
         output = ""
     else:
-        code = in_order(hufftree.root, 0, code)
+        code = in_order(heap[0], code)
         for char in data:
             output += str(code[char])
-    return output, hufftree  # returns encoded string and Huffman Tree
+        print(view_heap(heap))
+        print(output)
+    return output, heap  # returns encoded string and heap
 
 
 def huffman_decoding(data, tree):
@@ -274,6 +250,7 @@ if __name__ == "__main__":
              "AAAAAAAA",
              "The quick brown fox jumps over the lazy dog",
              "Cozy sphinx waves quart jug of bad milk",
+             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUV",
              ""]
     for a_great_sentence in tests:
         print(a_great_sentence)
@@ -289,5 +266,3 @@ if __name__ == "__main__":
 
         print("The size of the decoded data is: {}\n".format(sys.getsizeof(decoded_data)))
         print("The content of the encoded data is: {}\n".format(decoded_data))
-
-

@@ -140,8 +140,6 @@ def huffman_encoding(data):
     :param data: string (to encode)
     :return: A Huffman encoded string (of data) and the HuffmanTree used for encoding.
     """
-
-    print('String to encode: [{}]'.format(data))
     char_bins = {}  # to store character and frequency counts
     heap = []  # new heap
     code = {}  # to store Huffman codes
@@ -196,9 +194,6 @@ def huffman_encoding(data):
         code = in_order(heap[0], code)
         for char in data:
             output += str(code[char])
-        print(view_heap(heap))
-        print(output)
-        print(code)
     return output, heap
 
 

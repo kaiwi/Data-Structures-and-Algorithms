@@ -25,6 +25,7 @@ class LRUCache(OrderedDict):
         if key not in self.keys():  # cache miss
             return -1
         else:  # cache hit
+            self.move_to_end(key)  # move key to head of cache
             return self[key]
 
     def set(self, key, value):
@@ -60,8 +61,27 @@ if __name__ == "__main__":
     print(cache.get(3))  # verify get(), expect: 3
     print(cache.get(7))  # verify get(), expect: -1
     cache.set(-1, -1)  # verify negative keys
-    print(cache)  # expect: [4, 5, 1, 6, -1]
+    print(cache)  # expect: [5, 1, 6, 3, -1]
     cache.set(None, 'None')  # verify None input
-    print(cache)  # expect: [4, 5, 1, 6, -1]
+    print(cache)  # expect: [5, 1, 6, 3, -1]
     cache.set('a', 'a')  # verify string input
-    print(cache)  # expect: [5, 1, 6, -1, 'a']
+    print(cache)  # expect: [1, 6, 3, -1, 'a']
+
+    our_cache = LRUCache(5)
+    our_cache.set(1, 1)
+    our_cache.set(2, 2)
+    our_cache.set(3, 3)
+    our_cache.set(4, 4)
+    print(our_cache)
+    print(our_cache.get(1))  # returns 1
+    print(our_cache.get(2))  # returns 2
+    print(our_cache.get(9)) # returns -1
+    print(our_cache)
+    our_cache.set(5, 5)
+    print(our_cache)
+    our_cache.set(6, 6)
+    print(our_cache)
+    print(our_cache.get(3))  # returns -1 because key 3 was thrown out
+    our_cache.set(7, 7)
+    print(our_cache)
+    print(our_cache.get(4)) # 4 is thrown out
